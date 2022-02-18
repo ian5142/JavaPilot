@@ -14,7 +14,7 @@ public class JavaPilot {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        // TODO code application logic here
+        NMEA0183_IO serialReader = new NMEA0183_IO();
     }
     
 }
