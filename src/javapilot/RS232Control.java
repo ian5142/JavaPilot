@@ -82,7 +82,7 @@ public class RS232Control {
      * Opens a COM port at the specified settings (9600 8N1)
      * Can throw an error opening the port
      */
-    private void openP() {
+    private void open() {
         try {
             serialPort.openPort();
             serialPort.setParams(SerialPort.BAUDRATE_9600,
@@ -97,7 +97,7 @@ public class RS232Control {
             serialPort.setRTS(false);
             serialPort.setDTR(false);
         } catch (SerialPortException ex) {
-            System.out.println("There is an error opening port т: " + ex);
+            System.out.println("Error in opening COM-port: " + ex);
         }
     }
 
@@ -112,10 +112,30 @@ public class RS232Control {
             serialPort.closePort();
             success = true;
         } catch (SerialPortException ex) {
-            System.out.println("Error in receiving string from COM-port: " + ex);
+            System.out.println("Error in closing COM-port: " + ex);
 //            Logger.getLogger(RS232Control.class.getName()).log(Level.ERROR, null, ex);
         }
         return success;
+    }
+    
+    /**
+     * Opens the serial port. Tries to read a string from the serial port.
+     * Closes the serial port.
+     *
+     * @return Returns the byte array read from the serial port.
+     */
+    protected byte [] testRead() {
+        byte [] readArray = null;
+        try {
+            readArray = serialPort.readBytes(9);
+            serialPort.closePort();
+        } 
+        
+        catch (SerialPortException ex) {
+            System.out.println("Error in receiving string from COM-port: " + ex);
+//            Logger.getLogger(RS232Control.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return readArray;
     }
     
     /**
