@@ -4,6 +4,7 @@
  */
 package javapilot;
 
+import java.util.Scanner;
 import jssc.*; // Java Simple Serial Connector, the library that contains the serial methods
 
 /**
@@ -26,6 +27,95 @@ public class RS232Control {
         receivingMessage = false;
         reader = new SerialPortReader();
         readLine = "";
+    }
+    
+    /**
+     * Finds the serial port to be used, in Windows type COM1, for example In
+     * Linux, type /dev/pts/3 for example. The custom USB-RS232 device, using a
+     * MCP2200, is on /dev/ttyACM0/
+     * All serial ports may not be listed.
+     *
+     * @return The serial port name in String format, used to open and close the
+     * port
+     */
+    private String findPort() {
+        System.out.println("List of COM ports:");
+        String[] portNames = SerialPortList.getPortNames();
+        for (String portName1 : portNames) {
+            System.out.println(portName1);
+        }
+        
+        System.out.println("What COM port are you using?");
+        System.out.println("Please type it in how it appears above.");
+        Scanner sc = new Scanner(System.in);
+        String port = "";
+        if (sc.hasNext()) {
+            port = sc.next();
+        } else {
+
+        }
+        return port;
+    }
+    
+    /**
+     * Checks if the serial port is connected
+     * @return Returns true if any of the serial ports found using getPortNames() 
+     * matches the portName global variable (what ever the user types in when 
+     * findPort() is called).
+     */
+    protected boolean serialConnected () {
+        boolean connected = false;
+        String[] portNames = SerialPortList.getPortNames();
+        for (String portName1 : portNames) {
+            if (portName1.equals(portName) ) {
+                connected = true;
+//                System.out.println("Connected successfully to serial port: " + portName);
+            }
+            else {
+//                System.out.println("Can not connect to serial port: " + portName);
+            }
+        }
+        return connected;
+    }
+
+    /**
+     * Opens a COM port at the specified settings (9600 8N1)
+     * Can throw an error opening the port
+     */
+    private void openP() {
+        try {
+            serialPort.openPort();
+            serialPort.setParams(SerialPort.BAUDRATE_9600,
+                    SerialPort.DATABITS_8,
+                    SerialPort.STOPBITS_1,
+                    SerialPort.PARITY_NONE);
+
+            serialPort.setFlowControlMode(SerialPort.FLOWCONTROL_NONE);
+            int mask = SerialPort.MASK_RXCHAR;
+            serialPort.setEventsMask(mask);
+            serialPort.addEventListener(reader);
+            serialPort.setRTS(false);
+            serialPort.setDTR(false);
+        } catch (SerialPortException ex) {
+            System.out.println("There is an error opening port т: " + ex);
+        }
+    }
+
+    /**
+     * Closes the serial port, can throw a SerialPortException error.
+     *
+     * @return
+     */
+    private boolean close() {
+        boolean success = false;
+        try {
+            serialPort.closePort();
+            success = true;
+        } catch (SerialPortException ex) {
+            System.out.println("Error in receiving string from COM-port: " + ex);
+//            Logger.getLogger(RS232Control.class.getName()).log(Level.ERROR, null, ex);
+        }
+        return success;
     }
     
     /**
