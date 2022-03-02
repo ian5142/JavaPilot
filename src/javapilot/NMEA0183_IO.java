@@ -48,9 +48,12 @@ public class NMEA0183_IO {
      */
     protected double readHDG () {
         double heading = 0;
+        String strHeading = "";
         String line = read();
         if (line.startsWith("$HCHDG")) {
-            
+            String [] parts = line.split(",");
+            strHeading = parts[1];
+            heading = Double.parseDouble(strHeading);
         }
         return heading;
     }
