@@ -41,6 +41,11 @@ public class NMEA0183_IO {
         return readString;
     }
     
+    /**
+     * Calls read() method above. Parses the heading data from a NMEA0183 string.
+     * 
+     * @return The heading in decimal degrees. (0.0 to 359.9 degrees)
+     */
     protected double readHDG () {
         double heading = 0;
         String line = read();
