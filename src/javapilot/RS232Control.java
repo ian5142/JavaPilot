@@ -140,8 +140,9 @@ public class RS232Control {
     protected byte [] testRead() {
         byte [] readArray = null;
         try {
+            open();
             readArray = serialPort.readBytes(9);
-            serialPort.closePort();
+            close();
         } 
         
         catch (SerialPortException ex) {
