@@ -28,6 +28,8 @@ public class JavaPilot {
      */
     public static void main(String[] args) {
         NMEA0183_IO serialReader = new NMEA0183_IO();
+        double heading = serialReader.readHDG();
+        System.out.println("Heading: " + heading);
     }
     
 }
