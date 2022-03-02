@@ -35,9 +35,18 @@ public class NMEA0183_IO {
      *
      * @return The line read from the serial port
      */
-    protected String read() {
+    protected String read () {
         byte [] readArray = controller.testRead();
         String readString = new String(readArray);
         return readString;
+    }
+    
+    protected double readHDG () {
+        double heading = 0;
+        String line = read();
+        if (line.startsWith("$HCHDG")) {
+            
+        }
+        return heading;
     }
 }
