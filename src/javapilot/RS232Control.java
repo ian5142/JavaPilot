@@ -141,7 +141,7 @@ public class RS232Control {
         byte [] readArray = null;
         try {
             open();
-            readArray = serialPort.readBytes(9);
+            readArray = serialPort.readBytes(30);
             close();
         } 
         
