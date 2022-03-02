@@ -24,7 +24,11 @@ package javapilot;
 public class NMEA0183_IO {
     RS232Control controller;
     double currentHDG;
-    
+    /**
+     * Constructor for NMEA0183_IO
+     * Creates a new RS232Control object
+     * Assigns a heading value of 0.0 to currentHDG.
+     */
     public NMEA0183_IO () {
         controller = new RS232Control();
         currentHDG = 0.0;
@@ -38,6 +42,7 @@ public class NMEA0183_IO {
     protected String read () {
         byte [] readArray = controller.testRead();
         String readString = new String(readArray);
+//                "$HCHDG,120.3,,,17.5,W"; //Used for testing.
         return readString;
     }
     
