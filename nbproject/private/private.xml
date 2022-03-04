@@ -4,6 +4,9 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/C:/Users/Ian/Documents/NetBeansProjects/JavaPilot/src/javapilot/JavaPilot.java</file>
+            <file>file:/C:/Users/Ian/Documents/NetBeansProjects/JavaPilot/src/javapilot/RelayControl.java</file>
+            <file>file:/C:/Users/Ian/Documents/NetBeansProjects/JavaPilot/src/javapilot/NMEA0183_IO.java</file>
+            <file>file:/C:/Users/Ian/Documents/NetBeansProjects/JavaPilot/src/javapilot/RS232Control.java</file>
         </group>
     </open-files>
 </project-private>
