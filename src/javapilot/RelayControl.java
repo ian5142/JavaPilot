@@ -17,10 +17,18 @@
  */
 package javapilot;
 
+import com.pi4j.io.gpio.*;
+
 /**
  * Contains methods to control the relays via GPIO on the Raspberry PI 4.
  * @author Ian
  */
 public class RelayControl {
+    /**
+     * The Relay Control Constructor
+     */
+    public RelayControl () {
+        
+    }
     //Not Implemented yet.
 }
