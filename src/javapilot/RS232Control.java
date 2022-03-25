@@ -21,8 +21,8 @@ import java.util.Scanner;
 import jssc.*; // Java Simple Serial Connector, the library that contains the serial methods
 
 /**
- *
- * @author Ian
+ * Contains low-level methods to receive incoming serial data. All of it is passed to NMEA0183_IO methods.
+ * @author Ian Van Schaick
  */
 public class RS232Control {
     static SerialPort serialPort;
