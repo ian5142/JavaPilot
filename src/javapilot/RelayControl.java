@@ -21,7 +21,7 @@ import com.diozero.api.DigitalOutputDevice;
 
 /**
  * Contains methods to control the relays via GPIO on the Raspberry PI 4.
- * @author Ian
+ * @author Ian Van Schaick
  */
 public class RelayControl {
     public static final int DIGITAL_OUTPUT_PIN = 2; //Left Relay control pin
