@@ -34,7 +34,7 @@ public class RS232Control {
     String readLine;
     
     public RS232Control () {
-        portName = "/dev/ttyUSB0";
+        portName = "/dev/ttyACM0";
         serialPort = new SerialPort(portName);
         message = new StringBuilder();
         receivingMessage = false;
