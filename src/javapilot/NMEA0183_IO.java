@@ -18,8 +18,8 @@
 package javapilot;
 
 /**
- * 
- * @author Ian
+ * Contains methods to interact with NMEA0183 HDG sentences, creates an RS232Control object.
+ * @author Ian Van Schaick
  */
 public class NMEA0183_IO {
     RS232Control controller;
@@ -53,7 +53,7 @@ public class NMEA0183_IO {
      */
     protected double readHDG () {
         double heading = 0;
-        String strHeading = "";
+        String strHeading;
         String line = read();
         if (line.startsWith("$HCHDG")) {
             String [] parts = line.split(",");
