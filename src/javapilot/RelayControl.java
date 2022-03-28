@@ -18,6 +18,7 @@
 package javapilot;
 
 import com.diozero.api.DigitalOutputDevice;
+import java.util.ArrayList;
 
 /**
  * Contains methods to control the relays via GPIO on the Raspberry PI 4.
@@ -28,13 +29,12 @@ public class RelayControl {
     public static final int DIGITAL_OUTPUT_PIN2 = 3; //Right Relay control pin
     DigitalOutputDevice leftOutput; //DigitalOutputDevice object used to control the left output pin
     DigitalOutputDevice rightOutput; //DigitalOutputDevice object used to control the right output pin
-    
     /**
      * The Relay Control Constructor
      */
     public RelayControl () {
-        leftOutput = new DigitalOutputDevice(DIGITAL_OUTPUT_PIN, false, true);
-        rightOutput = new DigitalOutputDevice(DIGITAL_OUTPUT_PIN2, false, true);
+//        leftOutput = new DigitalOutputDevice(DIGITAL_OUTPUT_PIN, false, true);
+//        rightOutput = new DigitalOutputDevice(DIGITAL_OUTPUT_PIN2, false, true);
     }
     
     /**
@@ -80,6 +80,55 @@ public class RelayControl {
             relayON = rightOutput.isOn();
         }
         return relayON;
+    }
+    
+    /**
+     * 
+     * @param list
+     * @param direction
+     * @return 
+     */
+    protected ArrayList calculateDirection (ArrayList<Integer> list, boolean direction) {
+        int desired = list.get(0);
+        int current = list.get(1);
+        int countCurrent = list.get(2);
+        int count = list.get(3);
+        if (direction) { //counts clockwise if true
+            System.out.println("countCurrent: " + countCurrent);
+            if ((desired < countCurrent) || (desired > countCurrent)) {
+                System.out.println("Counting up");
+                count++;
+                if (countCurrent == 360) {
+                    countCurrent = 0;
+                }
+                countCurrent++;
+                list.set(2, countCurrent);
+                list.set(3, count);
+                list = calculateDirection(list, direction);
+            }
+            else if (countCurrent == desired) {
+                System.out.println("countCurrent = Desired.");
+            }
+        }
+        else if (!direction) { //counts counter-clockwise if false
+            System.out.println("countCurrent2: " + countCurrent);
+            System.out.println("desired2: " + desired);
+            if ((desired < countCurrent) || (desired > countCurrent)) {
+                System.out.println("Counting down");
+                if (countCurrent == 0) {
+                    countCurrent = 360;
+                }
+                countCurrent--;
+                count++;
+                list.set(2, countCurrent);
+                list.set(3, count);
+                list = calculateDirection(list, direction);
+            }
+            else if (countCurrent == desired) {
+                System.out.println("countCurrent = Desired.2");
+            }
+        }
+        return list;
     }
 }
 
