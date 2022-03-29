@@ -110,7 +110,7 @@ public class RelayControl {
                 System.out.println("countCurrent = Desired.");
             }
         }
-        else if (!direction) { //counts counter-clockwise if false
+        else { //counts counter-clockwise if false
             System.out.println("countCurrent2: " + countCurrent);
             System.out.println("desired2: " + desired);
             if ((desired < countCurrent) || (desired > countCurrent)) {
