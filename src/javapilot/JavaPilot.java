@@ -77,7 +77,6 @@ public class JavaPilot {
             
             System.out.println("CW-List count: " + CW_count);
             System.out.println("CCW-List count: " + CCW_count);
-            
             if ( (desiredHeading == currentHeading) || (desiredHeading == currentHeading)// Turns both relays off.
                     || (desiredHeading + 3 == currentHeading) || (desiredHeading - 3 == currentHeading 
                     || (desiredHeading == currentHeading + 3) || (desiredHeading == currentHeading - 3))) {
@@ -139,7 +138,7 @@ class DesiredHeading extends TimerTask {
         }
         if (!headingStr.isBlank()){
             double newHeading = Double.parseDouble(headingStr);
-            if (newHeading > 360 || newHeading < 0) {
+            if (newHeading >= 360 || newHeading < 0) {
                 heading = oldHeading;
                 System.out.println("Not a valid heading.");
             }
