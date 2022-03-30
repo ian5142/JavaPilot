@@ -42,77 +42,70 @@ public class JavaPilot {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-//        Timer timer = new Timer();
-//        DesiredHeading dh = new DesiredHeading();
-//        timer.schedule(dh, 0, 5000);
-            RelayControl relay = new RelayControl ();
-//            NMEA0183_IO serialReader = new NMEA0183_IO();
+        Timer timer = new Timer();
+        DesiredHeading dh = new DesiredHeading();
+        timer.schedule(dh, 0, 2000);
+        RelayControl relay = new RelayControl ();
+        NMEA0183_IO serialReader = new NMEA0183_IO();
+
+        while (true) {
+            //Get the Current heading from the Arduino
+            double currentHeading = serialReader.readHDG();
+            System.out.println("Current Heading: " + currentHeading);
+            //Get the Desired heading from the command line. Initial = 0
+            double desiredHeading = dh.getDesiredHeading();
+            System.out.println("Desired Heading: " + desiredHeading);
+
+            ArrayList<Integer> CW_list = new ArrayList<Integer>(4); //Create an ArrayList to hold values for clockwise counting
+            CW_list.add((int) desiredHeading); //desired heading
+            CW_list.add((int) currentHeading); //current heading
+            CW_list.add((int) currentHeading); //current count position 
+            CW_list.add(0); //number of degrees counted
+            CW_list = relay.calculateDirection(CW_list, true);
+//                System.out.println("Finished counting up");
+            // Do the same thing but counter clockwise.
+            ArrayList<Integer> CCW_list = new ArrayList<Integer>(4);
+            CCW_list.add((int) desiredHeading); //desired heading
+            CCW_list.add((int) currentHeading); //current heading
+            CCW_list.add((int) currentHeading); //current count position 
+            CCW_list.add(0); //number of degrees counted
+            CCW_list = relay.calculateDirection(CCW_list, false);
+//            System.out.println("Finished counting down");
+
+            int CW_count = CW_list.get(3);
+            int CCW_count = CCW_list.get(3);
             
-//            while (true) {
-                //Get the Current heading from the Arduino
-                double currentHeading = 45;
-//                        serialReader.readHDG();
-                System.out.println("Current Heading: " + currentHeading);
-                //Get the Desired heading from the command line. Initial = 0
-                double desiredHeading = 345;
-//                        dh.getDesiredHeading();
-                System.out.println("Desired Heading: " + desiredHeading);
-                //Calculate the 180 deg switchPoint
-//                double switchPoint = 0;
-////                if (currentHeading < 180 ) {
-////                    switchPoint = currentHeading + 180;
-////                }
-////                else if (currentHeading > 180) {
-////                    switchPoint = currentHeading - 180;
-////                }
-//                
-//                if (currentHeading <= 180) {
-//                    switchPoint = currentHeading + 180;
-//                }
-//                else if (currentHeading > 180) {
-//                    switchPoint = currentHeading - 180;
-//                }
-//                
-//                System.out.println("SwitchPoint: " + switchPoint);
-//                double difference = currentHeading - desiredHeading;
-                ArrayList<Integer> C_list = new ArrayList<Integer>(4);
-                C_list.add((int) desiredHeading); //desired heading
-                C_list.add((int) currentHeading); //current heading
-                C_list.add((int) currentHeading); //current count position 
-                C_list.add(0); //number of degrees counted
-                C_list = relay.calculateDirection(C_list, true);
-                System.out.println("Finished counting up");
-                // Do the same thing but counter clockwise.
-                ArrayList<Integer> CW_list = new ArrayList<Integer>(4);
-                CW_list.add((int) desiredHeading); //desired heading
-                CW_list.add((int) currentHeading); //current heading
-                CW_list.add((int) currentHeading); //current count position 
-                CW_list.add(0); //number of degrees counted
-                CW_list = relay.calculateDirection(CW_list, false);
-                System.out.println("Finished counting down");
-                
-                System.out.println("C-List count: " + C_list.get(3));
-                System.out.println("CW-List count: " + CW_list.get(3));
-                
-//                if (desiredHeading > switchPoint) { //The -3 allows for a hysteresis of 3 degrees
-//                    //error either side. So that the relays don't chatter too much.
-//                    boolean RelayON = relay.RelayON(0);
-//                    boolean RelayOFF1 = relay.RelayOFF(1);
-//                    System.out.println("Turning Left");
-//                }
-//                else if (desiredHeading <= switchPoint) { //The 3 allows for a hysteresis of 3 degrees
-//                    //error either side. So that the relays don't chatter too much.
-//                    boolean RelayON1 = relay.RelayON(1); 
-//                    boolean RelayOFF = relay.RelayOFF(0);
-//                    System.out.println("Turning Right");
-//                }
-//                else { // Turns both relays off.
-//                    boolean RelayOFF = relay.RelayOFF(0);
-//                    boolean RelayOFF1 = relay.RelayOFF(1);
-//                }
+            System.out.println("CW-List count: " + CW_count);
+            System.out.println("CCW-List count: " + CCW_count);
+            
+            if ( (desiredHeading == currentHeading) || (desiredHeading == currentHeading)// Turns both relays off.
+                    || (desiredHeading + 3 == currentHeading) || (desiredHeading - 3 == currentHeading 
+                    || (desiredHeading == currentHeading + 3) || (desiredHeading == currentHeading - 3))) {
+                    //The +/-3 allow for a hysteresis of 3 degrees
+                    //error either side. So that the relays don't chatter too much.
+                boolean RelayOFF = relay.RelayOFF(0);
+                boolean RelayOFF1 = relay.RelayOFF(1);
+            }
+            else if (CCW_count < CW_count) { 
+                boolean RelayON = relay.RelayON(0);
+                boolean RelayOFF1 = relay.RelayOFF(1);
+                System.out.println("Turning Left");
+            }
+            else if (CCW_count > CW_count) { 
+                boolean RelayON1 = relay.RelayON(1); 
+                boolean RelayOFF = relay.RelayOFF(0);
+                System.out.println("Turning Right");
+            }
+            for (int i = 0 ; i <= 17 ; i++) {
                 System.out.println();
-//            } //End of while (true) loop
-            
+            }
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(JavaPilot.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } //End of while (true) loop
+        
     } // End of main method
 } // End of Class
 
@@ -134,6 +127,7 @@ class DesiredHeading extends TimerTask {
             new InputStreamReader(System.in));
        String headingStr = "";
        oldHeading = heading;
+       System.out.print("Waiting for new desired heading: ");
         try { 
             headingStr = timeLimiter.callWithTimeout(reader::readLine, 10, TimeUnit.SECONDS);
         } catch (TimeoutException ex) {
@@ -144,9 +138,18 @@ class DesiredHeading extends TimerTask {
             Logger.getLogger(DesiredHeading.class.getName()).log(Level.SEVERE, null, ex);
         }
         if (!headingStr.isBlank()){
-            heading = Double.parseDouble(headingStr);
+            double newHeading = Double.parseDouble(headingStr);
+            if (newHeading > 360 || newHeading < 0) {
+                heading = oldHeading;
+                System.out.println("Not a valid heading.");
+            }
+            else {
+                heading = newHeading;
+            }
+            System.out.println();
         }
         else {
+            System.out.println("Timed out");
             heading = oldHeading;
         }
     }
