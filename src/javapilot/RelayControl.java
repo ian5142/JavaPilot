@@ -33,8 +33,8 @@ public class RelayControl {
      * The Relay Control Constructor
      */
     public RelayControl () {
-//        leftOutput = new DigitalOutputDevice(DIGITAL_OUTPUT_PIN, false, true);
-//        rightOutput = new DigitalOutputDevice(DIGITAL_OUTPUT_PIN2, false, true);
+        leftOutput = new DigitalOutputDevice(DIGITAL_OUTPUT_PIN, false, true);
+        rightOutput = new DigitalOutputDevice(DIGITAL_OUTPUT_PIN2, false, true);
     }
     
     /**
@@ -94,38 +94,44 @@ public class RelayControl {
         int countCurrent = list.get(2);
         int count = list.get(3);
         if (direction) { //counts clockwise if true
-            System.out.println("countCurrent: " + countCurrent);
-            if ((desired < countCurrent) || (desired > countCurrent)) {
-                System.out.println("Counting up");
+            if (countCurrent == 360) { //If current counting position is 360, start counting up from 0
+                countCurrent = 0;
+            }
+//            System.out.println("countCurrent: " + countCurrent);
+            if ( ( (desired < countCurrent) || (desired > countCurrent) ) ) { //&& ((desired + 2 != countCurrent) || (desired - 2 != countCurrent) )
+//                System.out.println("Counting up");
                 count++;
-                if (countCurrent == 360) {
-                    countCurrent = 0;
+                if (count < 360) {
+//                    System.out.println("Count: " + count);
+                    countCurrent++;
+                    list.set(2, countCurrent);
+                    list.set(3, count);
+                    list = calculateDirection(list, direction);
                 }
-                countCurrent++;
-                list.set(2, countCurrent);
-                list.set(3, count);
-                list = calculateDirection(list, direction);
             }
             else if (countCurrent == desired) {
-                System.out.println("countCurrent = Desired.");
+//                System.out.println("countCurrent = Desired.");
             }
         }
-        else { //counts counter-clockwise if false
-            System.out.println("countCurrent2: " + countCurrent);
-            System.out.println("desired2: " + desired);
-            if ((desired < countCurrent) || (desired > countCurrent)) {
-                System.out.println("Counting down");
-                if (countCurrent == 0) {
+        else if (!direction) { //counts counter-clockwise if false
+//            System.out.println("countCurrent2: " + countCurrent);
+//            System.out.println("desired2: " + desired);
+            if ( ( (desired < countCurrent) || (desired > countCurrent)) ) { //&& ((desired + 2 != countCurrent) || (desired - 2 != countCurrent) )
+//                System.out.println("Counting down");
+                count++;
+                if (countCurrent == 0) {//If current counting position is 0, start counting down from 360
                     countCurrent = 360;
                 }
-                countCurrent--;
-                count++;
-                list.set(2, countCurrent);
-                list.set(3, count);
-                list = calculateDirection(list, direction);
+                if (count < 360) {
+//                    System.out.println("Count: " + count);
+                    countCurrent--;
+                    list.set(2, countCurrent);
+                    list.set(3, count);
+                    list = calculateDirection(list, direction);
+                }
             }
             else if (countCurrent == desired) {
-                System.out.println("countCurrent = Desired.2");
+//                System.out.println("countCurrent = Desired.2");
             }
         }
         return list;
