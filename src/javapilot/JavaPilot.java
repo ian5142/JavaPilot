@@ -75,11 +75,16 @@ public class JavaPilot {
             int CW_count = CW_list.get(3);
             int CCW_count = CCW_list.get(3);
             
+            int desiredHeadingP3 = (int) desiredHeading + 3;
+            int desiredHeadingS3 = (int) desiredHeading - 3;
+            
+            int currentHeadingP3 = (int) currentHeading + 3;
+            int currentHeadingS3 = (int) currentHeading - 3;
             System.out.println("CW-List count: " + CW_count);
             System.out.println("CCW-List count: " + CCW_count);
             if ( (desiredHeading == currentHeading) || (desiredHeading == currentHeading)// Turns both relays off.
-                    || (desiredHeading + 3 == currentHeading) || (desiredHeading - 3 == currentHeading 
-                    || (desiredHeading == currentHeading + 3) || (desiredHeading == currentHeading - 3))) {
+                    || ( (desiredHeadingP3 <= currentHeading) && (desiredHeadingS3 >= currentHeading) )
+                    || ( (desiredHeading <= currentHeadingP3) && (desiredHeading >= currentHeadingS3) ) ) {
                     //The +/-3 allow for a hysteresis of 3 degrees
                     //error either side. So that the relays don't chatter too much.
                 boolean RelayOFF = relay.RelayOFF(0);
@@ -99,7 +104,7 @@ public class JavaPilot {
                 System.out.println();
             }
             try {
-                Thread.sleep(2000);
+                Thread.sleep(100);
             } catch (InterruptedException ex) {
                 Logger.getLogger(JavaPilot.class.getName()).log(Level.SEVERE, null, ex);
             }
