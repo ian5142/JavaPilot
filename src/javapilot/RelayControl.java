@@ -21,7 +21,7 @@ import com.diozero.api.DigitalOutputDevice;
 import java.util.ArrayList;
 
 /**
- * Contains methods to control the relays via GPIO on the Raspberry PI 4.
+ * Contains methods to control the relays via GPIO on the Raspberry PI 4. As well as the calculateDirection method.
  * @author Ian Van Schaick
  */
 public class RelayControl {
@@ -83,15 +83,15 @@ public class RelayControl {
     }
     
     /**
-     * 
-     * @param list
-     * @param direction
-     * @return 
+     * Calculates the degrees between current and desired, called recursively.
+     * @param list ArrayList containing the necessary information in the following order: desired, current, countCurrent, count
+     * @param direction The direction to count, clockwise is true, counter clockwise is false.
+     * @return The ArrayList above with an updated countCurrent and count.
      */
     protected ArrayList calculateDirection (ArrayList<Integer> list, boolean direction) {
         int desired = list.get(0);
         int current = list.get(1);
-        int countCurrent = list.get(2);
+        int countCurrent = list.get(2); //Used as a cursor position
         int count = list.get(3);
         if (direction) { //counts clockwise if true
             if (countCurrent == 360) { //If current counting position is 360, start counting up from 0
