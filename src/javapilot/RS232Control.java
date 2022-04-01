@@ -33,6 +33,9 @@ public class RS232Control {
     SerialPortReader reader;
     String readLine;
     
+    /**
+     * The RS232Control constructor
+     */
     public RS232Control () {
         portName = "/dev/ttyACM0";
         serialPort = new SerialPort(portName);
@@ -44,8 +47,7 @@ public class RS232Control {
     
     /**
      * Finds the serial port to be used, in Windows type COM1, for example In
-     * Linux, type /dev/pts/3 for example. The custom USB-RS232 device, using a
-     * MCP2200, is on /dev/ttyACM0/
+     * Linux, type /dev/pts/3 for example. The Arduino is on /dev/ttyACM0
      * All serial ports may not be listed.
      *
      * @return The serial port name in String format, used to open and close the
@@ -73,7 +75,7 @@ public class RS232Control {
     /**
      * Checks if the serial port is connected
      * @return Returns true if any of the serial ports found using getPortNames() 
-     * matches the portName global variable (what ever the user types in when 
+     * matches the portName global variable (what ever the user types in if 
      * findPort() is called).
      */
     protected boolean serialConnected () {
@@ -93,7 +95,7 @@ public class RS232Control {
 
     /**
      * Opens a COM port at the specified settings (9600 8N1)
-     * Can throw an error opening the port
+     * Can throw a SerialPortException error opening the port
      */
     private void open() {
         try {
@@ -117,7 +119,7 @@ public class RS232Control {
     /**
      * Closes the serial port, can throw a SerialPortException error.
      *
-     * @return
+     * @return true if the port was successfully closed.
      */
     private boolean close() {
         boolean success = false;
@@ -164,14 +166,13 @@ public class RS232Control {
          * Reads the data bit by bit from the serial port Can throw a
          * SerialPortException error
          *
-         * @param event
+         * @param event The serial port event.
          */
         @Override
         public void serialEvent(SerialPortEvent event) {
             if (event.isRXCHAR() && event.getEventValue() == 10) {
                 try {
                     String line = serialPort.readString(event.getEventValue());
-//                    acknowledgeStr + acknowledgeStr + 
                     System.out.println("serialEvent: " + line);
                     if (line.contains((char) 0x6 + "")) {
                         System.out.println("Acknowledged");
