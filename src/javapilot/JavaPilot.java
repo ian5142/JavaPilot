@@ -22,8 +22,6 @@ import com.google.common.util.concurrent.TimeLimiter;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -31,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 /**
  * The main class, contains the main method which creates objects for NMEA0183_IO and RelayControl.
@@ -38,22 +37,55 @@ import java.util.logging.Logger;
  */
 public class JavaPilot {
     
+    final static String Digits = "(\\p{Digit}+)";
+    final static String HexDigits = "(\\p{XDigit}+)";
+// an exponent is 'e' or 'E' followed by an optionally 
+// signed decimal integer.
+    final static String Exp = "[eE][+-]?" + Digits;
+    final static String fpRegex
+            = ("[\\x00-\\x20]*"
+            + // Optional leading "whitespace"
+            "[+-]?("
+            + // Optional sign character
+            "NaN|"
+            + // "NaN" string
+            "Infinity|"
+            + // "Infinity" string
+            // Digits ._opt Digits_opt ExponentPart_opt FloatTypeSuffix_opt
+            "(((" + Digits + "(\\.)?(" + Digits + "?)(" + Exp + ")?)|"
+            + // . Digits ExponentPart_opt FloatTypeSuffix_opt
+            "(\\.(" + Digits + ")(" + Exp + ")?)|"
+            + // Hexadecimal strings
+            "(("
+            + // 0[xX] HexDigits ._opt BinaryExponent FloatTypeSuffix_opt
+            "(0[xX]" + HexDigits + "(\\.)?)|"
+            + // 0[xX] HexDigits_opt . HexDigits BinaryExponent FloatTypeSuffix_opt
+            "(0[xX]" + HexDigits + "?(\\.)" + HexDigits + ")"
+            + ")[pP][+-]?" + Digits + "))"
+            + "[fFdD]?))"
+            + "[\\x00-\\x20]*");// Optional trailing "whitespace"
+    
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        Timer timer = new Timer();
-        DesiredHeading dh = new DesiredHeading();
-        timer.schedule(dh, 0, 2000);
         RelayControl relay = new RelayControl ();
         NMEA0183_IO serialReader = new NMEA0183_IO();
-
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        double oldHeading;
+        ExecutorService es = Executors.newSingleThreadExecutor();
+        TimeLimiter timeLimiter = SimpleTimeLimiter.create(es);
+        String headingStr = "";
+        //Get the Desired heading from the command line. Initial = 0
+        double desiredHeading = 0;
+        double currentHeading = 0;
+        byte count = 0;
+        
         while (true) {
+            count++;
             //Get the Current heading from the Arduino
-            double currentHeading = serialReader.readHDG();
+            currentHeading = serialReader.readHDG();
             System.out.println("Current Heading: " + currentHeading);
-            //Get the Desired heading from the command line. Initial = 0
-            double desiredHeading = dh.getDesiredHeading();
             System.out.println("Desired Heading: " + desiredHeading);
 
             ArrayList<Integer> CW_list = new ArrayList<Integer>(4); //Create an ArrayList to hold values for clockwise counting
@@ -101,68 +133,39 @@ public class JavaPilot {
                 System.out.println("Turning Right");
             }
             for (int i = 0 ; i <= 17 ; i++) {
-                System.out.println();
+                System.out.println(); //Add 17 blank lines so Waiting line ends up at bottom of window
             }
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException ex) {
-                Logger.getLogger(JavaPilot.class.getName()).log(Level.SEVERE, null, ex);
+            if (count == 10) {
+                oldHeading = desiredHeading;
+                System.out.print("Waiting for new desired heading: ");
+                double newHeading = -1;
+                try { 
+                    headingStr = timeLimiter.callWithTimeout(reader::readLine, 5, TimeUnit.SECONDS);
+                } catch (TimeoutException ex) {
+                    //Do nothing if it times out.
+                } catch (InterruptedException ex) {
+                    //Do nothing if it encounters an interupt exception.
+                } catch (ExecutionException ex) {
+                    //Do nothing if it encounters a execution exception.
+                }
+                if (Pattern.matches(fpRegex, headingStr)) {
+                    newHeading = Double.parseDouble(headingStr);
+                    if (newHeading >= 360 || newHeading < 0) {
+                        desiredHeading = oldHeading;
+                        System.out.println("Not a valid heading.");
+                    }
+                    else if (newHeading != -1) {
+                        desiredHeading = newHeading;
+                        System.out.println();
+                    }
+                    else {
+                        System.out.println("Timed out");
+                        desiredHeading = oldHeading;
+                    }
+                }
+                count = 0;
             }
         } //End of while (true) loop
         
     } // End of main method
 } // End of Class
-
-/**
- * 
- * Internal class to ask the user for a desired heading via the command-line
- * interface. Contains a getDesiredHeading method to return the desired heading 
- * to the main method.
- */
-class DesiredHeading extends TimerTask {
-    protected static BufferedReader reader;
-    protected static double heading;
-    protected static double oldHeading;
-    @Override
-    public void run() {
-    ExecutorService es = Executors.newSingleThreadExecutor();
-    TimeLimiter timeLimiter = SimpleTimeLimiter.create(es);
-       reader = new BufferedReader(
-            new InputStreamReader(System.in));
-       String headingStr = "";
-       oldHeading = heading;
-       System.out.print("Waiting for new desired heading: ");
-        try { 
-            headingStr = timeLimiter.callWithTimeout(reader::readLine, 10, TimeUnit.SECONDS);
-        } catch (TimeoutException ex) {
-            //Do nothing if it times out.
-        } catch (InterruptedException ex) {
-            Logger.getLogger(DesiredHeading.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ExecutionException ex) {
-            Logger.getLogger(DesiredHeading.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        if (!headingStr.isBlank()){
-            double newHeading = Double.parseDouble(headingStr);
-            if (newHeading >= 360 || newHeading < 0) {
-                heading = oldHeading;
-                System.out.println("Not a valid heading.");
-            }
-            else {
-                heading = newHeading;
-            }
-            System.out.println();
-        }
-        else {
-            System.out.println("Timed out");
-            heading = oldHeading;
-        }
-    }
-    
-    /**
-     * Returns the desired heading as a double.
-     * @return Returns the desired heading.
-     */
-    protected double getDesiredHeading () {
-        return heading;
-    }
-}
